@@ -13,8 +13,7 @@ Python的网络攻击脚本
 8. [RIP攻击](md/8.RIP攻击.md)
 
 附加
-
-[Python 命令行参数](md/Python 命令行参数.md)
+[Python 命令行参数](md/Python命令行参数.md)
 
 
 
