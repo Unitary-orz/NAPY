@@ -44,7 +44,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('network', help='eg:192.168.1.0/24')
     args = parser.parse_args()
-    network = list(ipaddress.ip_network(args.network))
+    network = list(ipaddress.ip_network(args.network,strict=False))
 
     icmp_scan(network)
 

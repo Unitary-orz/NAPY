@@ -7,8 +7,9 @@ from scapy.all import (
     ARP,
     Dot1Q,
     Ether,
-    sendp,
+    sendp
 )
+from scapy.interfaces import get_working_if
 import argparse
 import os
 import sys
@@ -21,10 +22,10 @@ def arp_spoof(iface, target, host, vlan_own=False, vlan_target=False):
     # target 目标机ip
     # host   伪装的ip
 
-    mac_self = get_if_hwaddr(iface)  # 自身mac
+    mac_self = get_if_hwaddr(iface)  # 获取自身mac地址
 
     if target:
-        mac_target = getmacbyip(target)  # 目标机mac
+        mac_target = getmacbyip(target)  # 获取目标机mac
 
         if not mac_target:
             print('[-]Error: Could not resole targets MAC address')
@@ -84,7 +85,7 @@ def main():
     parser.add_argument(
         '-t', '--target', help='Specify a target to ARP poison')
     parser.add_argument('-vl', '--vlan', nargs=2,
-                        help='The vlan hopping of use eg:-vl 1 2')
+                        help='The vlan hopping of use (eg:-vl 1 2)')
     parser.add_argument('host', help='host of impersonate')
 
     try:
