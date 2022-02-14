@@ -52,6 +52,9 @@ def ip_check(address):
     return True
 
 
+# function init
+
+
 def scan():
     name_print("Scan Mode")
     menu = [("ARP Scan", arpScan), ("ICMP Scan", icmpScan), ("Back", main)]
@@ -63,7 +66,8 @@ def attack():
 
     menu = [
         ("ARP Spoof", arpSpoof),
-        ("STP Attack\DOS", stpAttack),
+        ("STP Spoof", stpSpoof),
+        ("STP Dos", stpDos),
         ("MAC Flood", main),
         ("Back", main),
     ]
@@ -163,12 +167,59 @@ def arpSpoof():
         ans = input("Continue(y/n)?")
         if ans == "y":
             continue
-        if ans == "no":
+        if ans == "n":
+            attack()
+
+
+def stpDos():
+    name_print("STP DOS")
+
+    iface_working = get_working_if().name
+
+    while True:
+        iface = (
+            input("Enter a network interface of use(Default:{}):".format(iface_working))
+            or iface_working
+        )
+        # print(iface, iface_working)
+        if iface in get_if_list():
             break
+        print("[-]Error: {} does not exist,Now interface:".format(iface))
+        show_interfaces()
+    try:
+        bpdu_dos(iface)
+    except KeyboardInterrupt:
+        print("[+]Stop dos")
+        ans = input("Continue(y/n)?")
+        if ans == "y":
+            stpDos()
+        if ans == "n":
+            attack()
 
 
-def stpAttack():
-    name_print("STP Attack")
+def stpSpoof():
+    name_print("STP Spoof")
+    iface_working = get_working_if().name
+
+    while True:
+        iface = (
+            input("Enter a network interface of use(Default:{}):".format(iface_working))
+            or iface_working
+        )
+        print(iface, iface_working)
+        if iface in get_if_list():
+            break
+        print("[-]Error: {} does not exist,Now interface:".format(iface))
+        show_interfaces()
+    try:
+        bpdu_spoof(iface)
+    except KeyboardInterrupt:
+        print("\n[+]Stop spoof")
+        ans = input("Continue(y/n)?")
+        if ans == "y":
+            stpSpoof()
+        if ans == "n":
+            attack()
 
 
 def main():
