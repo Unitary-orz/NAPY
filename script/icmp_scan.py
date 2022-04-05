@@ -7,7 +7,10 @@ import argparse
 import ipaddress
 import os
 import sys
+import time
+import logging
 
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
 # 发送ICMP请求,判断是否存活
 def icmp_requset(ip_dst, iface=None):
@@ -15,11 +18,12 @@ def icmp_requset(ip_dst, iface=None):
     req = srp1(pkt, timeout=3, verbose=False)
 
     if req:
-        print('[+]', ip_dst, '    Host is up')
+        print("[+]", ip_dst, "    Host is up")
 
 
 # 进行子网的多线程扫描
 def icmp_scan(network):
+    begin = time.time()
     threads = []
     length = len(network)
     for ip in network:
@@ -31,6 +35,8 @@ def icmp_scan(network):
 
     for i in range(length):
         threads[i].join()
+    stop = time.time()
+    print("[+]complete scan time cost:%.3fs" % (stop - begin))
 
 
 # 参数选项
@@ -38,16 +44,16 @@ def main():
     # Windows下注释掉这段
     # 判断是否为root
     if os.getuid() != 0:
-        print('[-]Need root user to run')
+        print("[-]Need root user to run")
         sys.exit(1)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('network', help='eg:192.168.1.0/24')
+    parser.add_argument("network", help="eg:192.168.1.0/24")
     args = parser.parse_args()
-    network = list(ipaddress.ip_network(args.network,strict=False))
+    network = list(ipaddress.ip_network(args.network, strict=False))
 
     icmp_scan(network)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

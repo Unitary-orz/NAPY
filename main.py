@@ -6,6 +6,10 @@ from time import sleep
 from script import *
 import ipaddress
 import time
+import logging
+
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+
 from scapy.all import *
 
 
@@ -57,7 +61,12 @@ def ip_check(address):
 
 def scan():
     name_print("Scan Mode")
-    menu = [("ARP Scan", arpScan), ("ICMP Scan", icmpScan), ("Back", main)]
+    menu = [
+        ("ARP Scan", arpScan),
+        ("ICMP Scan", icmpScan),
+        ("TCP Scan", tcpScan),
+        ("Back", main),
+    ]
     menu_print(menu)
 
 
@@ -68,7 +77,7 @@ def attack():
         ("ARP Spoof", arpSpoof),
         ("STP Spoof", stpSpoof),
         ("STP Dos", stpDos),
-        ("MAC Flood", main),
+        ("MAC Flood", macFlood),
         ("Back", main),
     ]
     menu_print(menu)
@@ -77,16 +86,15 @@ def attack():
 # Scan Mode
 
 
-def arpScan():
-    name_print("ARP Scan")
+def scan_input(mode):
     while True:
         print("\nEnter a network you need to scan (e:exit)")
         net = input("Network(192.168.1.0/24):")
-        if net == "e" or net == "exit" or net == "q":
+        if net == "e" or net == "exit" or net == "q" or net == "quit":
             scan()
         try:
             net = list(ipaddress.ip_network(net, False))
-            arp_scan(net)
+            mode(net)
         # 捕获Ctrl + C
         except KeyboardInterrupt:
             time.sleep(1)
@@ -101,22 +109,19 @@ def arpScan():
         #     break
 
 
+def arpScan():
+    name_print("ARP Scan")
+    scan_input(arp_scan)
+
+
 def icmpScan():
     name_print("ICMP Scan")
-    while True:
-        print("Enter a network you need to scan (e:exit)")
-        net = input("Network(192.168.1.0/24):")
-        if net == "e" or net == "exit" or net == "q":
-            scan()
-        try:
-            net = list(ipaddress.ip_network(net, strict=False))
-            icmp_scan(net)
-        # 捕获Ctrl + C
-        except KeyboardInterrupt:
-            print("[-]Stop scan")
-        except ValueError:
-            print("\nEnter a network!!!!! eg:192.168.1.0/24\n")
-            time.sleep(1)
+    scan_input(icmp_scan)
+
+
+def tcpScan():
+    name_print("TCP Scan")
+    scan_input(arp_scan)
 
 
 # Attack Mode
@@ -152,7 +157,7 @@ def arpSpoof():
             print("[-]Error: {} does not exist,Now interface:".format(iface))
             show_interfaces()
         vlan = input("Enter vlan hopping of use(Default:None):").split(" ")
-        print(host, target, iface, vlan)
+        # print(host, target, iface, vlan)
         if vlan != [""]:
             arp_spoof(
                 iface,
@@ -218,6 +223,31 @@ def stpSpoof():
         ans = input("Continue(y/n)?")
         if ans == "y":
             stpSpoof()
+        if ans == "n":
+            attack()
+
+
+def macFlood():
+    name_print("MAC Flood")
+    iface_working = get_working_if().name
+
+    while True:
+        iface = (
+            input("Enter a network interface of use(Default:{}):".format(iface_working))
+            or iface_working
+        )
+        # print(iface, iface_working)
+        if iface in get_if_list():
+            break
+        print("[-]Error: {} does not exist,Now interface:".format(iface))
+        show_interfaces()
+    try:
+        bpdu_dos(iface)
+    except KeyboardInterrupt:
+        print("[+]Stop flood")
+        ans = input("Continue(y/n)?")
+        if ans == "y":
+            stpDos()
         if ans == "n":
             attack()
 
